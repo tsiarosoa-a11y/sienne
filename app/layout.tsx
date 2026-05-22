@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { AuthProvider } from "@/lib/auth";
 import { StoreProvider } from "@/lib/store";
 import { AppShell } from "@/components/AppShell";
 import "./globals.css";
@@ -19,9 +20,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" suppressHydrationWarning>
       <body className="min-h-dvh bg-bg text-text1 font-sans">
-        <StoreProvider>
-          <AppShell>{children}</AppShell>
-        </StoreProvider>
+        <AuthProvider>
+          <StoreProvider>
+            <AppShell>{children}</AppShell>
+          </StoreProvider>
+        </AuthProvider>
       </body>
     </html>
   );

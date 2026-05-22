@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import clsx from "clsx";
 import { useStore } from "@/lib/store";
+import { useAuth } from "@/lib/auth";
 import { monthLabel, MONTH_LABELS } from "@/lib/format";
 
 const NAV = [
@@ -17,19 +18,37 @@ const NAV = [
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const router = useRouter();
   const pathname = usePathname();
+  const { user, loading: authLoading, signOut } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const isAuthRoute = pathname === "/auth";
+
+  useEffect(() => {
+    if (!authLoading && !user && !isAuthRoute) {
+      router.push("/auth");
+    }
+  }, [user, authLoading, isAuthRoute, router]);
+
+  // Pour la page /auth, on affiche juste le contenu sans le shell
+  if (isAuthRoute) {
+    return <>{children}</>;
+  }
+
+  // Pour les autres pages, on attend l'authentification
+  if (authLoading || !user) {
+    return null;
+  }
 
   return (
     <div className="min-h-dvh flex">
-      {/* ─── Sidebar desktop ─────────────────────────────── */}
       <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r border-border1/10 bg-surface/40 backdrop-blur-sm sticky top-0 h-dvh">
         <Brand />
         <Nav pathname={pathname} />
-        <FooterInfo />
+        <FooterInfo user={user} onSignOut={signOut} />
       </aside>
 
-      {/* ─── Sidebar mobile (off-canvas) ──────────────────── */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -45,13 +64,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <Brand onCloseMobile={() => setMobileOpen(false)} />
               <Nav pathname={pathname} onNavigate={() => setMobileOpen(false)} />
-              <FooterInfo />
+              <FooterInfo user={user} onSignOut={signOut} />
             </motion.aside>
           </>
         )}
       </AnimatePresence>
 
-      {/* ─── Main ────────────────────────────────────────── */}
       <div className="flex-1 min-w-0 flex flex-col">
         <Topbar onOpenMobile={() => setMobileOpen(true)} />
         <main className="flex-1 px-4 sm:px-6 lg:px-10 py-6 sm:py-8 max-w-[1400px] w-full mx-auto">
@@ -62,7 +80,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 
-// ─── BRAND ──────────────────────────────────────────────
 function Brand({ onCloseMobile }: { onCloseMobile?: () => void }) {
   return (
     <div className="px-5 pt-6 pb-4 flex items-center justify-between">
@@ -89,7 +106,6 @@ function Brand({ onCloseMobile }: { onCloseMobile?: () => void }) {
   );
 }
 
-// ─── NAV ────────────────────────────────────────────────
 function Nav({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
   return (
     <nav className="px-3 mt-3 flex-1">
@@ -103,9 +119,7 @@ function Nav({ pathname, onNavigate }: { pathname: string; onNavigate?: () => vo
                 onClick={onNavigate}
                 className={clsx(
                   "relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
-                  active
-                    ? "text-text1"
-                    : "text-text2 hover:text-text1 hover:bg-surface2/60"
+                  active ? "text-text1" : "text-text2 hover:text-text1 hover:bg-surface2/60"
                 )}
               >
                 {active && (
@@ -128,22 +142,41 @@ function Nav({ pathname, onNavigate }: { pathname: string; onNavigate?: () => vo
   );
 }
 
-// ─── FOOTER ─────────────────────────────────────────────
-function FooterInfo() {
+function FooterInfo({ user, onSignOut }: { user: any; onSignOut: () => Promise<void> }) {
+  const [signingOut, setSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    try {
+      await onSignOut();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSigningOut(false);
+    }
+  };
+
   return (
-    <div className="px-5 py-5 mt-auto border-t border-border1/10">
-      <div className="text-[10.5px] uppercase tracking-[0.18em] text-text3 mb-1">
-        Astuce
+    <div className="px-5 py-5 mt-auto border-t border-border1/10 space-y-3">
+      <div>
+        <div className="text-[10.5px] uppercase tracking-[0.18em] text-text3 mb-1">
+          Connecté
+        </div>
+        <p className="text-[12px] text-text2 truncate">
+          {user?.email}
+        </p>
       </div>
-      <p className="text-[11.5px] leading-relaxed text-text2">
-        Les champs <span className="text-inputText font-semibold">en crème</span> sont éditables.
-        Tout est sauvegardé localement.
-      </p>
+      <button
+        onClick={handleSignOut}
+        disabled={signingOut}
+        className="w-full px-3 py-2 rounded-lg bg-accentLight/40 hover:bg-accentLight/60 text-text1 text-sm font-medium transition-colors disabled:opacity-50"
+      >
+        {signingOut ? "Déconnexion..." : "Déconnexion"}
+      </button>
     </div>
   );
 }
 
-// ─── TOPBAR ─────────────────────────────────────────────
 function Topbar({ onOpenMobile }: { onOpenMobile: () => void }) {
   const { state, dispatch, currentMonth } = useStore();
   const [openMonth, setOpenMonth] = useState(false);
@@ -161,7 +194,6 @@ function Topbar({ onOpenMobile }: { onOpenMobile: () => void }) {
           </svg>
         </button>
 
-        {/* Month switcher */}
         <div className="relative">
           <button
             onClick={() => setOpenMonth(v => !v)}
@@ -201,7 +233,6 @@ function Topbar({ onOpenMobile }: { onOpenMobile: () => void }) {
 
         <div className="flex-1" />
 
-        {/* Theme toggle */}
         <button
           onClick={() => dispatch({ type: "TOGGLE_THEME" })}
           className="size-10 rounded-xl hover:bg-surface2 grid place-items-center text-text2 transition-colors"
