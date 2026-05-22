@@ -1,0 +1,61 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { useStore } from "@/lib/store";
+import { KpiGrid } from "@/components/dashboard/KpiGrid";
+import { CashflowSummary } from "@/components/dashboard/CashflowSummary";
+import { SectionPanel } from "@/components/dashboard/SectionPanel";
+import { ExpenseBreakdown, BudgetVsActual } from "@/components/charts/DashboardCharts";
+
+export default function DashboardPage() {
+  const { currentMonth } = useStore();
+
+  return (
+    <div className="space-y-6 sm:space-y-8">
+      {/* ─── Page header ─── */}
+      <motion.div
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex items-start justify-between gap-4 flex-wrap"
+      >
+        <div>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[11px] uppercase tracking-[0.18em] text-text3">Tableau de bord</span>
+            <span className="text-text4">·</span>
+            <span className="text-[11px] tracking-wider text-text3 tabular-nums">{currentMonth.label}</span>
+          </div>
+          <h1 className="font-display text-3xl sm:text-[40px] leading-[1.05] tracking-tight text-text1 max-w-2xl">
+            <span className="italic text-accent">Votre</span> mois en un coup d'œil
+          </h1>
+          <p className="text-text2 mt-2 text-[14.5px] max-w-xl">
+            Saisissez les montants réels au fil du mois — les totaux et le restant se recalculent instantanément.
+          </p>
+        </div>
+      </motion.div>
+
+      {/* ─── KPIs ─── */}
+      <KpiGrid />
+
+      {/* ─── Cashflow + Charts row ─── */}
+      <div className="grid grid-cols-1 xl:grid-cols-[1.1fr,1fr] gap-4 sm:gap-6">
+        <CashflowSummary />
+        <div className="grid grid-cols-1 gap-4 sm:gap-6">
+          <BudgetVsActual />
+          <ExpenseBreakdown />
+        </div>
+      </div>
+
+      {/* ─── Section panels ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <SectionPanel section="income" />
+        <SectionPanel section="bills"    showDueDay showCheck />
+        <SectionPanel section="expenses" />
+        <SectionPanel section="debts"    showDueDay showCheck />
+        <div className="lg:col-span-2">
+          <SectionPanel section="savings" showCheck />
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,154 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,30..70;1,9..144,300..700,30..70&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===========================================================
+   PALETTE — Extraite directement du fichier Excel
+   (FDF6F3, FFFFFF, F3EAE5, F7DDD6, FFF8DC, EFC5B8, C4746B,
+   C0524D, 2A1C18, 6B4A42, A07870, C8ADA7, 1F4E9C)
+   =========================================================== */
+:root {
+  /* Light — mode crème terre de Sienne */
+  --bg:             253 246 243;  /* #FDF6F3 */
+  --surface:        255 255 255;  /* #FFFFFF */
+  --surface-2:      243 234 229;  /* #F3EAE5 */
+  --surface-3:      247 221 214;  /* #F7DDD6 */
+  --input:          255 248 220;  /* #FFF8DC */
+  --accent-light:   239 197 184;  /* #EFC5B8 */
+  --accent:         196 116 107;  /* #C4746B */
+  --accent-strong:  192  82  77;  /* #C0524D */
+  --text-1:          42  28  24;  /* #2A1C18 */
+  --text-2:         107  74  66;  /* #6B4A42 */
+  --text-3:         160 120 112;  /* #A07870 */
+  --text-4:         200 173 167;  /* #C8ADA7 */
+  --input-text:      31  78 156;  /* #1F4E9C */
+  --border:         196 116 107;
+  --success:        110 144 100;  /* vert chaleureux */
+  --warning:        192  82  77;
+
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body:    "Plus Jakarta Sans", "DM Sans", system-ui, sans-serif;
+}
+
+.dark {
+  /* Dark — palette dérivée, conservant la chaleur terracotta */
+  --bg:              26  19  16;
+  --surface:         37  27  23;
+  --surface-2:       47  34  28;
+  --surface-3:       61  42  34;
+  --input:           54  41  20;
+  --accent-light:   138  74  61;
+  --accent:         216 133 119;
+  --accent-strong:  232 153 145;
+  --text-1:         250 240 236;
+  --text-2:         212 191 182;
+  --text-3:         159 132 120;
+  --text-4:         106  80  72;
+  --input-text:     130 180 255;
+  --border:         216 133 119;
+  --success:        152 192 142;
+  --warning:        232 153 145;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  background: rgb(var(--bg));
+  color: rgb(var(--text-1));
+  font-family: var(--font-body);
+  font-feature-settings: "ss01", "ss02", "cv11";
+}
+
+/* Grain léger sur le fond, pour la chaleur du papier */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(at 20% 0%, rgb(var(--accent-light) / 0.18), transparent 50%),
+    radial-gradient(at 80% 100%, rgb(var(--surface-3) / 0.35), transparent 55%);
+  z-index: -1;
+}
+.dark body::before {
+  background-image:
+    radial-gradient(at 20% 0%, rgb(var(--accent) / 0.10), transparent 50%),
+    radial-gradient(at 80% 100%, rgb(var(--accent-light) / 0.08), transparent 55%);
+}
+
+/* Glassmorphism léger pour les cartes premium */
+.glass {
+  background: rgb(var(--surface) / 0.72);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgb(var(--border) / 0.12);
+}
+.dark .glass {
+  background: rgb(var(--surface) / 0.55);
+  border: 1px solid rgb(var(--border) / 0.18);
+}
+
+/* Scrollbar sobre, dans la palette */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--accent-light) / 0.4);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--accent) / 0.6); background-clip: padding-box; }
+
+/* Sélection */
+::selection {
+  background: rgb(var(--accent) / 0.25);
+  color: rgb(var(--text-1));
+}
+
+/* Champ éditable (réutilise les "cellules jaunes" du fichier Excel) */
+.editable {
+  background: rgb(var(--input));
+  color: rgb(var(--input-text));
+  border: 1px solid rgb(var(--accent-light) / 0.6);
+  transition: all 180ms ease;
+}
+.editable:hover {
+  border-color: rgb(var(--accent) / 0.6);
+}
+.editable:focus {
+  outline: none;
+  border-color: rgb(var(--accent));
+  box-shadow: 0 0 0 3px rgb(var(--accent) / 0.15);
+}
+.dark .editable {
+  background: rgb(var(--input) / 0.5);
+}
+
+/* Progress bar ASCII-style, hommage au fichier Excel */
+.ascii-bar {
+  font-family: "JetBrains Mono", "SF Mono", monospace;
+  letter-spacing: -0.5px;
+}
+
+/* Animation de chiffre qui s'incrémente */
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-count { animation: count-up 400ms ease-out; }
+
+/* Sépare les sections par un trait fin terracotta */
+.divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgb(var(--accent-light) / 0.4),
+    transparent
+  );
+}
