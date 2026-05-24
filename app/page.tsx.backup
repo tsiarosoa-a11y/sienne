@@ -33,7 +33,6 @@ export default function DashboardPage() {
             Saisissez les montants réels au fil du mois — les totaux et le restant se recalculent instantanément.
           </p>
         </div>
-          <PrintButton />
       </motion.div>
 
       {/* ─── KPIs ─── */}

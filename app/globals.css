@@ -152,3 +152,59 @@ body::before {
     transparent
   );
 }
+
+/* ─── Styles d'impression ─────────────────────────────────────── */
+@media print {
+  /* Masquer les éléments inutiles à l'impression */
+  .no-print,
+  aside,
+  header,
+  nav,
+  button:not(.print-keep) {
+    display: none !important;
+  }
+
+  /* Format A4 portrait */
+  @page {
+    size: A4 portrait;
+    margin: 1.5cm;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt;
+  }
+
+  /* Forcer les couleurs */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Éviter les coupures dans les cartes */
+  .card, [class*="rounded-"] {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Pleine largeur pour le main */
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Titre d'impression en haut */
+  .print-title {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #C4746B;
+  }
+}
+
+.print-title {
+  display: none;
+}
